@@ -1,0 +1,73 @@
+{
+    "showRoadsScale": 4000,
+
+    "showScaleScale": 700,
+
+    "styles": {
+
+        "bottomPadding": 40,
+
+        "markerRadius": 5,
+
+        "highlightedCountryColor": "#f3f3f3",
+
+        "icons": {
+            "capitalSize": 6,
+            "citySize": 3
+        },
+
+        "scale": {
+            "fontFamily": "Guardian Text Sans Web",
+            "fontSize": 12,
+            "fontWeight": 400,
+            "color": "#bdbdbd"
+        },
+
+        "textNodes": {
+            "marker": {
+                "fontFamily": "Guardian Text Sans Web",
+                "fontSize": 18,
+                "fontWeight": 600,
+                "color": "#B82266"
+            },
+            "country": {
+                "fontFamily": "Guardian Egyptian Web",
+                "fontSize": 20,
+                "fontWeight": 600,
+                "color": "#808080"
+            },
+            "city": {
+                "fontFamily": "Guardian Text Sans Web",
+                "fontSize": 14,
+                "fontWeight": 400,
+                "color": "#999999"
+            },
+            "capital": {
+                "fontFamily": "Guardian Text Sans Web",
+                "fontSize": 14,
+                "fontWeight": 600,
+                "color": "#808080"
+            },
+            "positions": {
+                "topleft":      ["end",   -4, -5],
+                "top":          ["middle", 0, -5],
+                "topright":     ["start",  5, -5],
+                "right":        ["start",  6,  4],
+                "bottomright":  ["start",  5, 17],
+                "bottom":       ["middle", 0, 17],
+                "bottomleft":   ["end",   -2, 17],
+                "left":         ["end",   -8,  4]
+            }
+        }
+    },
+
+    "merged": [
+        "Wales", "Scotland", "England", // UK
+        "Brussels", "Walloon", "Flemish", // Belgium
+        "Andaman Islands" // India
+    ],
+
+    "showBoundingBoxes": false,
+    "countryCulling": true
+
+}

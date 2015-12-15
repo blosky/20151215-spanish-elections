@@ -1,0 +1,35 @@
+.btn {
+    @include fs-textSans(1);
+    line-height: 22px;
+    font-weight: bold;
+    padding: 3px 15px;
+    border: 0;
+    background-color: #ddd;
+    border-radius: 100px;
+    color: #333;
+    cursor: pointer;
+    margin-top: 6px;
+    outline: none;
+
+    &:hover {
+        background-color: #ccc;
+    }
+}
+
+.btn--red {
+    background-color: #b61701;
+    color: white;
+    &:hover {
+        background-color: darken(#b61701, 10%);
+    }
+
+}
+
+.btn--blue {
+    background-color: #00558b;
+    color: white;
+    &:hover {
+        background-color: darken(#00558b, 10%);
+    }
+
+}

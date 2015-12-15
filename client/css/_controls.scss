@@ -1,0 +1,75 @@
+.controls {
+
+    width: 230px;
+    float: left;
+
+    padding-right: 20px;
+    label {
+        display: block;
+        @include fs-textSans(2);
+        white-space: nowrap;
+        padding-top: 6px;
+
+        span:first-child {
+            @include fs-header(1);
+            display: inline-block;
+            width: 80px;
+        }
+        span:nth-child(2) {
+            float: right;
+            line-height: 24px;
+        }
+
+        input {
+            display: inline-block;
+            width: 70px;
+        }
+    }
+}
+
+
+.btn--update {
+    width: 100%;
+    margin-top: 12px;
+}
+
+.btn--reset {
+    float: right;
+}
+
+.btn--embed,
+.btn--link,
+.btn--download {
+    float: left;
+}
+
+.btn--link,
+.btn--download {
+    margin-left: 10px;
+    text-decoration: none;
+}
+
+.px-label {
+    @include fs-textSans(2);
+    font-weight: normal;
+}
+
+#tools {
+    ul {
+        overflow: visible;
+        font-size: 0;
+        padding: 0;
+        margin: 0;
+        padding-bottom: 10px;
+    }
+    li {
+        display: inline-block;
+        cursor: pointer;
+        font-size: 0;
+        background: #ccc;
+        border: 1px solid #777;
+        margin-right: 2px;
+        width: 32px;
+        height: 32px;
+    }
+}

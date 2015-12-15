@@ -1,0 +1,50 @@
+$guss-webfonts-base-url: '../bower_components/guss-webfonts/webfonts';
+$guss-webfonts-charset: 'original';
+$guss-webfonts-hinting: 'off';
+$guss-webfonts-kerning: 'on';
+$guss-webfonts-version: '';
+
+$frontend-webfonts: ( // this should replicate frontend's font config
+    'Guardian Egyptian Web': (
+        (weight: 'light', style: 'normal'),
+        (weight: 'regular', style: 'normal'),
+        (weight: 'medium', style: 'normal'),
+        (weight: 'semibold', style: 'normal', use-as: ( weight: ultrablack )),
+    ),
+    'Guardian Sans Web': (
+        (weight: 'regular', style: 'normal'),
+    ),
+    'Guardian Text Egyptian Web': (
+        (weight: 'regular', style: 'normal'),
+        (weight: 'regular', style: 'italic'),
+        (weight: 'medium', style: 'normal', use-as: ( weight: bold )),
+    ),
+    'Guardian Text Sans Web': (
+        (weight: 'regular', style: 'normal'),
+        (weight: 'regular', style: 'italic'),
+        (weight: 'medium', style: 'normal', use-as: ( weight: bold )),
+    ),
+) !default;
+
+@import '../../bower_components/guss-webfonts/src/_webfonts.scss';
+@import '../../bower_components/guss-typography/_typography.scss';
+@include guss-webfonts($frontend-webfonts);
+
+html, body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-feature-settings: 'kern';
+  -moz-font-feature-settings: 'kern';
+  font-feature-settings: 'kern';
+  -webkit-font-kerning: normal;
+  -moz-font-kerning: normal;
+  font-kerning: normal;
+  -webkit-font-variant-ligatures: common-ligatures;
+  -moz-font-variant-ligatures: common-ligatures;
+  font-variant-ligatures: common-ligatures;
+}
+html {
+  font-family: "Guardian Text Egyptian Web",Georgia,serif;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+

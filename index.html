@@ -1,0 +1,45 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   <script src="traceur.min.js"></script>
+    <script src="system.js"></script>
+    <script>
+      // set our baseURL reference path
+      System.config({
+        baseURL: '/'
+      });
+
+      // loads /app/main.js
+      System.import('main.js');
+
+    </script>
+    
+    
+    <style type="text/css">
+    body{padding: 0; margin: 0;}
+    #button{width: 100px; height: 50px; background: red;}
+
+    #base_map{fill: #f9f9f9; stroke:#CCCCCC;}
+    circle{stroke:white;fill:red;fill-opacity:0.5}
+    /*#annotations, #interact{position: absolute;top: 0;left: 0;width:100%; height:auto;pointer-events:none;border:1px solid green;}
+    #container{position: relative; border: 1px solid red;}*/
+    
+    </style>
+
+</head>
+<body>
+  <div id='button' onclick="changeTriggered()"></div>
+  <div id='container'></div>
+
+  <script type="text/javascript">
+    function changeTriggered()
+    {
+      infomap.setProjection(d3.geo.albers())
+      infomap.redraw();
+    }
+  </script>
+	
+</body>
+</html>
