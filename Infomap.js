@@ -3,6 +3,7 @@ import topojson from './topojson.v1.min.js'
 import Scalecolor from './client/js/lib/Scalecolor.js'
 
 
+
 export default class Infomap
 {
 	constructor({container, width = 200, height = 700, geo = {topojson, className}, data = {csv, className, data}, quantile = {domain:[0,100], range:10}, colors = ['#4BC6DF','#951C55']})	
@@ -39,19 +40,21 @@ export default class Infomap
 		this.path;
 
 
-		var createSvg = function(id){
+		var createSvg = function(id, position, left){
 			return d3.select(self.container).append('svg')
 			.attr('id', id)
 			.attr("viewBox", "0 0 " + self.width + " " + self.height )
 			.attr("preserveAspectRatio", "xMinYMax")
 			.style('width', self.width)
 			.style('border', '1px solid green')
+			.style('position', position)
+			.style('left', left)
 
 		}
 		
-		this.map = createSvg('map');
-		var annotations = createSvg('annotations');
-		var interact = createSvg('interact');
+		this.map = createSvg('map', 'relative');
+		var annotations = createSvg('annotations', 'absolute', 0);
+		var interact = createSvg('interact', 'absolute', 0);
 
 		window.onresize = function(event)
 		{
@@ -98,19 +101,33 @@ export default class Infomap
 			.attr('class', 'node')
 			.attr("id", d => ('c'+ getClassname(d.properties[className])))
 			.attr("d", this.path);
-
-			console.log(this.csv, this.csvClassName)
 			
 			d3.map(this.csv, d => 
-			d3.select('#'+ this.getClassname(d[this.csvClassName]))
+			d3.select('#'+this.container.id+' #'+ this.getClassname(d[this.csvClassName]))
 			.attr('fill', this.colors[d[this.csvData]])
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', '0.5')
 			)
+	    	break;
 
+	    	case 'heatmap':
+	    	this.map.selectAll('.nodes')
+			.data(features.features)
+			.enter()
+			.append('path')
+			.attr('class', 'node')
+			.attr("id", d => ('c'+ getClassname(d.properties[className])))
+			.attr("d", this.path);
 
-
-
+			d3.map(this.csv, d => console.log(d, d[this.csvData]))
+			
+			d3.map(this.csv, d => 
+			d3.select('#'+this.container.id+' #'+ this.getClassname(d[this.csvClassName]))
+			.attr('fill', this.colors)
+			.attr('opacity', parseInt(d[this.csvData]) / 100)
+			.attr('stroke', '#ffffff')
+			.attr('stroke-width', '0.5')
+			)
 	    	break;
 			
 		

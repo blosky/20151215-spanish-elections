@@ -1,42 +1,20 @@
 import Infomap from './Infomap.js';
 import queue from './client/js/lib/queue.v1.min.js'
+import Activemap from './ActiveMap.js'
 
 class App
 {
 	constructor()
 	{
-
-		var container = document.getElementById("container");
+		
 		var self = this;
-		this.infomap;
-
-		var button = document.getElementById("button");
-
 
 		queue()
 		.defer(d3.json, 'client/json/spain_admin2.json')
 		.defer(d3.json, 'http://interactive.guim.co.uk/docsdata-test/13ByyTtZpwpfKgu1dycuLn72jh5Au2BPLSlTiDGEr9yY.json')
-		//.defer(d3.csv, 'client/csv/001_GNM-24062015.csv')
 		.await(self.createMap);
-
-		var tooltip;//TBC.
 	}
-	/*
-	" 2014/15": "333"
-	2011/12: "3970"
-	Class: "L"
-	Local authority: "Barking and Dagenham"
-	ecode: "E5030"
-	variation: "-91.6120906801"
-	*/
-	/*
-	sheets: Object
-Sheet1: Array[51]
-0: Object
-code: "13596"
-party: "PP"
-province: "Almería"
-*/
+
 	createMap(error, topojson, json)
 	{
 			//console.log(json);
@@ -59,45 +37,141 @@ province: "Almería"
 			colors["Others"]='#DADADA';
 
 
-            self.infomap = new Infomap(
-            {
-            	container:container,
-            	width:620,
-            	height:700,
-            	geo:{topojson:topojson,className:'ID_2'},
-            	data:{
-            		csv:json.sheets.Sheet1.map(function(d){
-            				return {
-            					code:"c"+d.code,
-            					party:d.party
-            				}
-            			}
-            		),
-            		className:'code',
-            		data:"party"
-            	},
-            	colors:colors
-            });
+			var map1 = self.infomap = new Infomap(
+			{
+				container:document.getElementById("container1"),
+				width:300,
+				height:300,
+				geo:{topojson:topojson,className:'ID_2'},
+				data:{
+					csv:json.sheets.Sheet1.map(function(d){
+						return {
+							code:"c"+d.code,
+							party:d.party
+						}
+					}
+					),
+					className:'code',
+					data:"party"
+				},
+				colors:colors
+			});
 
-            infomap.setProjection(d3.geo.azimuthalEqualArea());
-            infomap.getProjection().center([-1.8,39]);
-		//infomap.getProjection().rotate([3,1])
-		infomap.getProjection().scale(2900);
+			map1.setProjection(d3.geo.azimuthalEqualArea());
+			map1.getProjection().center([-1.8,39]);
+			map1.getProjection().scale(1400);
+			map1.createMap('choropleth');
 
-		infomap.createMap('choropleth');
 
-		/*infomap.getProjection().center([54,-2]);
-		infomap.getProjection().scale(1500);*/
+			var map2 = self.infomap = new Infomap(
+			{
+				container:document.getElementById("container2"),
+				width:300,
+				height:300,
+				geo:{topojson:topojson,className:'ID_2'},
+				data:{
+					csv:json.sheets.Sheet1.map(function(d){
+						return {
+							code:"c"+d.code,
+							percentage:d['pp-percentage']
+						}
+					}
+					),
+					className:'code',
+					data:"percentage"
+				},
+				colors:colors["PP"]
+			});
 
-		/*infomap.getProjection().center([-1,53]);
-		infomap.getProjection().scale(4000);
-		infomap.redraw()*/
+			map2.setProjection(d3.geo.azimuthalEqualArea());
+			map2.getProjection().center([-1.8,39]);
+			map2.getProjection().scale(1400);
+			map2.createMap('heatmap');
+
+			var map3 = self.infomap = new Infomap(
+			{
+				container:document.getElementById("container3"),
+				width:300,
+				height:300,
+				geo:{topojson:topojson,className:'ID_2'},
+				data:{
+					csv:json.sheets.Sheet1.map(function(d){
+						return {
+							code:"c"+d.code,
+							percentage:d['psoe-percentage']
+						}
+					}
+					),
+					className:'code',
+					data:"percentage"
+				},
+				colors:colors["PSOE"]
+			});
+
+			map3.setProjection(d3.geo.azimuthalEqualArea());
+			map3.getProjection().center([-1.8,39]);
+			map3.getProjection().scale(1400);
+			map3.createMap('heatmap');
+
+
+			var map4 = self.infomap = new Infomap(
+			{
+				container:document.getElementById("container4"),
+				width:300,
+				height:300,
+				geo:{topojson:topojson,className:'ID_2'},
+				data:{
+					csv:json.sheets.Sheet1.map(function(d){
+						return {
+							code:"c"+d.code,
+							percentage:d["cs-percentage"]
+						}
+					}
+					),
+					className:'code',
+					data:"percentage"
+				},
+				colors:colors["C's"]
+			});
+
+			map4.setProjection(d3.geo.azimuthalEqualArea());
+			map4.getProjection().center([-1.8,39]);
+			map4.getProjection().scale(1400);
+			map4.createMap('heatmap');
+
+			var map5 = self.infomap = new Infomap(
+			{
+				container:document.getElementById("container5"),
+				width:300,
+				height:300,
+				geo:{topojson:topojson,className:'ID_2'},
+				data:{
+					csv:json.sheets.Sheet1.map(function(d){
+						return {
+							code:"c"+d.code,
+							percentage:d["podemos-percentage"]
+						}
+					}
+					),
+					className:'code',
+					data:"percentage"
+				},
+				colors:colors["PODEMOS"]
+			});
+
+			map5.setProjection(d3.geo.azimuthalEqualArea());
+			map5.getProjection().center([-1.8,39]);
+			map5.getProjection().scale(1400);
+			map5.createMap('heatmap');
+
+
+
+		}
+
+
+
+
+
 	}
 
-	
-
-
-
-}
-
-new App()
+	new App()
