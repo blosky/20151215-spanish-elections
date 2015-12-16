@@ -12,14 +12,9 @@ export default class Infomap
 		this.container = container;
 		this.width = width;
 		this.height = height;
-		this.quantile = d3.scale.quantile()
+		/*this.quantile = d3.scale.quantile()
 		.domain(quantile.domain)
-		.range(d3.range(quantile.range).map(function(i) { return i; }));
-
-		
-
-		/*var colorScale = new Scalecolor(colors[0], colors[1], quantile.range);
-		this.colors = colorScale.colors;*/
+		.range(d3.range(quantile.range).map(function(i) { return i; }));*/
 
 		this.colors = colors;
 
@@ -27,7 +22,6 @@ export default class Infomap
 		this.projection = d3.geo.mercator()
 		.scale(100)
 		.translate([this.width/2, this.height/2]);
-
 
 		this.topojson = geo.topojson;
 		this.geoClassName = geo.className;
@@ -38,46 +32,55 @@ export default class Infomap
 		this.csvData = data.data;
 
 		this.path;
-
-
-		var createSvg = function(id, position, left){
-			return d3.select(self.container).append('svg')
+		
+		var createSvg = function(id, position, left, top, events){
+			return d3.select(self.container).style('height', self.height).append('svg')
 			.attr('id', id)
-			.attr("viewBox", "0 0 " + self.width + " " + self.height )
-			.attr("preserveAspectRatio", "xMinYMax")
+			.attr("viewBox", "0 0 300 205")// + self.width + " " + self.height )
+			.attr("preserveAspectRatio", "xMidYMid")
 			.style('width', self.width)
-			.style('border', '1px solid green')
+			.style('height', self.height)
 			.style('position', position)
 			.style('left', left)
+			.style('top', top)
+			.style('pointer-events', events)
 
 		}
 		
-		this.map = createSvg('map', 'relative');
-		var annotations = createSvg('annotations', 'absolute', 0);
-		var interact = createSvg('interact', 'absolute', 0);
+		this.map = createSvg('map', 'absolute', 0, 0,'');
+		this.annotations = createSvg('annotations', 'absolute', 0, 0, 'none');
+		this.interact = createSvg('interact', 'absolute', 0, 0,'none');
+		
+		/*/resizeMaps();
+		window.onresize = () => resizeMaps(event);
 
-		window.onresize = function(event)
+		function resizeMaps()
 		{
+			console.log(self,self.width);
 			if(window.innerWidth >= self.width)
 			{
-				d3.select('#map').style('width', self.width)
-				d3.select('#annotations').style('width', self.width)
-				d3.select('#interact').style('width', self.width)
+				d3.select(self.container)
+				//.style('height', self.height)
+				.selectAll('svg')
+				.style('width', self.width);
 			}
 			else
 			{
-				d3.select('#map').style('width', '100%');
-				d3.select('#annotations').style('width', '100%');
-				d3.select('#interact').style('width', '100%');
+				d3.select(self.container)
+				//.style('height', document.querySelector(".container").offsetWidth)
+				.selectAll('svg')
+				.style('width', '100%');
 			}
-		}
+		}*/
 	}
 
 
 
 	createMap(type)
 	{
-
+		var that = this;
+		var map = this.map;
+		var interact = this.interact;
 		var features = topojson.feature(this.topojson, this.unit);
 
 		this.path = d3.geo.path()
@@ -101,12 +104,14 @@ export default class Infomap
 			.attr('class', 'node')
 			.attr("id", d => ('c'+ getClassname(d.properties[className])))
 			.attr("d", this.path);
-			
+
 			d3.map(this.csv, d => 
-			d3.select('#'+this.container.id+' #'+ this.getClassname(d[this.csvClassName]))
+			this.map.select('#'+this.container.id+' #'+ this.getClassname(d[this.csvClassName]))
 			.attr('fill', this.colors[d[this.csvData]])
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', '0.5')
+			.on('mouseover', function(d){that.setClone(this, that.interact); })
+			.on('mouseout', function(){that.interact.selectAll('g').remove()})
 			)
 	    	break;
 
@@ -118,20 +123,19 @@ export default class Infomap
 			.attr('class', 'node')
 			.attr("id", d => ('c'+ getClassname(d.properties[className])))
 			.attr("d", this.path);
-
-			d3.map(this.csv, d => console.log(d, d[this.csvData]))
-			
+	
 			d3.map(this.csv, d => 
-			d3.select('#'+this.container.id+' #'+ this.getClassname(d[this.csvClassName]))
+
+			this.map.select('#'+this.container.id+' #'+ this.getClassname(d[this.csvClassName]))
 			.attr('fill', this.colors)
 			.attr('opacity', parseInt(d[this.csvData]) / 100)
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', '0.5')
+			.on('mouseover', function(d){that.setClone(this, d3.select('#' + that.container.id + ' #interact')); })
+			.on('mouseout', function(){that.interact.selectAll('g').remove()})
 			)
 	    	break;
 			
-		
-
 	    	case 'bubbles':
 	    	 this.map.selectAll('.nodes')
 		    .data(features.features)
@@ -143,6 +147,11 @@ export default class Infomap
 
 		    d3.map(this.csv, d=> d3.select('#'+ this.getClassname(d[this.csvClassName]))
 			.attr('r', this.quantile(d[this.csvData])))
+	    	break;
+
+	    	case 'scalerank':
+	    	var colorScale = new Scalecolor(colors[0], colors[1], quantile.range);
+			this.colors = colorScale.colors;
 	    	break;
 	    }
 
@@ -202,6 +211,19 @@ export default class Infomap
 	{
 		if(projection)this.projection = projection.translate([this.width/2, this.height/2]);
 		else console.log('There is no projection assigned');
+	}
+
+	setClone(d, interact)
+	{
+		return interact
+		.append("g")
+		.attr("id","clone")
+		.append("path")
+		.attr("class","selected")
+		.attr("d",d3.select(d).attr('d'))
+		.style('fill', 'none')
+		.style('stroke', 'black')
+		.style('stroke-width', 1);
 	}
 
 }

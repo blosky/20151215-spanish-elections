@@ -40,7 +40,7 @@ class App
 			var map1 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container1"),
-				width:300,
+				width:900,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -66,7 +66,7 @@ class App
 			var map2 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container2"),
-				width:300,
+				width:620,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -91,7 +91,7 @@ class App
 			var map3 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container3"),
-				width:300,
+				width:620,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -165,12 +165,32 @@ class App
 			map5.createMap('heatmap');
 
 
+			var temp = [900,620,620,300,300];
 
+			resizeMaps();
+			window.onresize = () => resizeMaps(event);
+
+			function resizeMaps()
+			{
+				console.log(self,self.width);
+				if(window.innerWidth >= self.width)
+				{
+					d3.selectAll(".container")
+					//.style('height', self.height)
+					//.style('height', document.querySelector(".container").offsetWidth)
+					.data(temp)
+					.selectAll('svg')
+					.style('width', d => d);
+				}
+				else
+				{
+					d3.selectAll(".container")
+					//.style('height', document.querySelector(".container").offsetWidth)
+					.selectAll('svg')
+					.style('width', '100%');
+				}
+			}
 		}
-
-
-
-
 
 	}
 

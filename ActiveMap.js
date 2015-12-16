@@ -11,8 +11,11 @@ function ActiveMap(url,options) {
 		constituencies_map={};
 
 	d3.xml(url, "image/svg+xml", function(xml) {
+		console.log(xml)
+
   
 		createMap(xml);
+
 
 	});
 	var clone,
