@@ -10,7 +10,7 @@ class App
 		var self = this;
 
 		queue()
-		.defer(d3.json, 'client/json/spain_admin2.json')
+		.defer(d3.json, 'client/json/esp_adm2.json')
 		.defer(d3.json, 'http://interactive.guim.co.uk/docsdata-test/13ByyTtZpwpfKgu1dycuLn72jh5Au2BPLSlTiDGEr9yY.json')
 		.await(self.createMap);
 	}
@@ -40,7 +40,7 @@ class App
 			var map1 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container1"),
-				width:900,
+				width:450,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -54,7 +54,8 @@ class App
 					className:'code',
 					data:"party"
 				},
-				colors:colors
+				colors:colors,
+				callback:map1Callback
 			});
 
 			map1.setProjection(d3.geo.azimuthalEqualArea());
@@ -63,10 +64,26 @@ class App
 			map1.createMap('choropleth');
 
 
+			function map1Callback(event)
+			{
+				var result;
+
+				d3.map(json.sheets.Sheet1, function(d)
+					{
+						if(d.code == event.split('c')[1])result = d; return;
+				})
+
+				//console.log(result);
+
+
+				d3.select('#container1 #map').on("mousemove", function(d){console.log(d3.mouse(this))})
+			}
+
+
 			var map2 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container2"),
-				width:620,
+				width:300,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -91,7 +108,7 @@ class App
 			var map3 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container3"),
-				width:620,
+				width:300,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -172,7 +189,7 @@ class App
 
 			function resizeMaps()
 			{
-				console.log(self,self.width);
+				//console.log(self,self.width);
 				if(window.innerWidth >= self.width)
 				{
 					d3.selectAll(".container")

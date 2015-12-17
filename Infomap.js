@@ -6,7 +6,7 @@ import Scalecolor from './client/js/lib/Scalecolor.js'
 
 export default class Infomap
 {
-	constructor({container, width = 200, height = 700, geo = {topojson, className}, data = {csv, className, data}, quantile = {domain:[0,100], range:10}, colors = ['#4BC6DF','#951C55']})	
+	constructor({container, width = 200, height = 700, geo = {topojson, className}, data = {csv, className, data}, quantile = {domain:[0,100], range:10}, colors = ['#4BC6DF','#951C55'], callback})	
 	{
 		var self = this;
 		this.container = container;
@@ -36,7 +36,7 @@ export default class Infomap
 		var createSvg = function(id, position, left, top, events){
 			return d3.select(self.container).style('height', self.height).append('svg')
 			.attr('id', id)
-			.attr("viewBox", "0 0 300 205")// + self.width + " " + self.height )
+			.attr("viewBox", '0 0 '+ self.width + " " + self.height )//"0 0 300 205")
 			.attr("preserveAspectRatio", "xMidYMid")
 			.style('width', self.width)
 			.style('height', self.height)
@@ -44,12 +44,15 @@ export default class Infomap
 			.style('left', left)
 			.style('top', top)
 			.style('pointer-events', events)
+			.style('border', '1px solid red')
 
 		}
 		
 		this.map = createSvg('map', 'absolute', 0, 0,'');
 		this.annotations = createSvg('annotations', 'absolute', 0, 0, 'none');
 		this.interact = createSvg('interact', 'absolute', 0, 0,'none');
+
+		this.callback = callback;
 		
 		/*/resizeMaps();
 		window.onresize = () => resizeMaps(event);
@@ -92,7 +95,7 @@ export default class Infomap
 		this.map.append("path")
 	    .datum(features, d => topojson.merge(d.geometry))
 	    .attr("id", "base_map")
-	    .attr("d", this.path);
+	    .attr("d", this.path)
 
 	    switch(type)
 	    {
@@ -110,7 +113,7 @@ export default class Infomap
 			.attr('fill', this.colors[d[this.csvData]])
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', '0.5')
-			.on('mouseover', function(d){that.setClone(this, that.interact); })
+			.on('mouseover', function(d){that.setClone(this, that.interact); if(that.callback)that.callback(that.getClassname(this.id))})
 			.on('mouseout', function(){that.interact.selectAll('g').remove()})
 			)
 	    	break;
@@ -131,7 +134,7 @@ export default class Infomap
 			.attr('opacity', parseInt(d[this.csvData]) / 100)
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', '0.5')
-			.on('mouseover', function(d){that.setClone(this, d3.select('#' + that.container.id + ' #interact')); })
+			.on('mouseover', function(d){that.setClone(this,  that.interact); if(that.callback) console.log('none')})
 			.on('mouseout', function(){that.interact.selectAll('g').remove()})
 			)
 	    	break;
@@ -166,6 +169,11 @@ export default class Infomap
 
 
 	//GETTERS
+
+	getSvg()
+	{
+		return this.map;
+	}
 
 	getCenter(features)
 	{
@@ -224,6 +232,12 @@ export default class Infomap
 		.style('fill', 'none')
 		.style('stroke', 'black')
 		.style('stroke-width', 1);
+	}
+
+
+	getPath()
+	{	
+		return this.path;
 	}
 
 }

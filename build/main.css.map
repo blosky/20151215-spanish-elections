@@ -1,9 +1,0 @@
-{
-	"version": 3,
-	"file": "main.css",
-	"sources": [
-		"../client/css/main.scss"
-	],
-	"mappings": "AAQA,CAAC,CAAC;EACE,UAAU,EAAE,UAAW,GAC1B",
-	"names": []
-}
