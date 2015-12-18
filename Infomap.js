@@ -1,6 +1,7 @@
 import d3 from './d3.v3.min.js'
 import topojson from './topojson.v1.min.js'
 import Scalecolor from './client/js/lib/Scalecolor.js'
+import TouchEvents from './TouchEvents.js'
 
 
 
@@ -12,6 +13,7 @@ export default class Infomap
 		this.container = container;
 		this.width = width;
 		this.height = height;
+
 		/*this.quantile = d3.scale.quantile()
 		.domain(quantile.domain)
 		.range(d3.range(quantile.range).map(function(i) { return i; }));*/
@@ -44,7 +46,6 @@ export default class Infomap
 			.style('left', left)
 			.style('top', top)
 			.style('pointer-events', events)
-			.style('border', '1px solid red')
 
 		}
 		
@@ -53,28 +54,7 @@ export default class Infomap
 		this.interact = createSvg('interact', 'absolute', 0, 0,'none');
 
 		this.callback = callback;
-		
-		/*/resizeMaps();
-		window.onresize = () => resizeMaps(event);
 
-		function resizeMaps()
-		{
-			console.log(self,self.width);
-			if(window.innerWidth >= self.width)
-			{
-				d3.select(self.container)
-				//.style('height', self.height)
-				.selectAll('svg')
-				.style('width', self.width);
-			}
-			else
-			{
-				d3.select(self.container)
-				//.style('height', document.querySelector(".container").offsetWidth)
-				.selectAll('svg')
-				.style('width', '100%');
-			}
-		}*/
 	}
 
 
@@ -97,6 +77,9 @@ export default class Infomap
 	    .attr("id", "base_map")
 	    .attr("d", this.path)
 
+	    this.centroids_map={};
+	    
+
 	    switch(type)
 	    {
 	    	case 'choropleth':
@@ -113,9 +96,36 @@ export default class Infomap
 			.attr('fill', this.colors[d[this.csvData]])
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', '0.5')
-			.on('mouseover', function(d){that.setClone(this, that.interact); if(that.callback)that.callback(that.getClassname(this.id))})
 			.on('mouseout', function(){that.interact.selectAll('g').remove()})
 			)
+
+			var centroids = this.setCentroids(this.map, this.centroids_map, "path.node", this);
+
+			this.map.on('mousemove',function(){
+				var coords=d3.mouse(this)
+				
+				var node=that.findClosest(coords,centroids.centroids)
+	    		that.interact.selectAll('g').remove()
+	    		that.setClone(node.node, that.interact); if(that.callback)that.callback(node)
+			})
+
+			var touchevents = new TouchEvents(this.map, {
+		    element:this.map.node(),
+
+		    touchStartCallback:function(coords){console.log('start')},
+		    touchEndCallback:function(coords){that.interact.selectAll('g').remove();console.log('end')},
+		    touchMoveCallback:function(coords){
+
+		    		coords[1]-=30;
+		    		
+		    		
+		    		var node=that.findClosest(coords,centroids.centroids)
+		    		that.interact.selectAll('g').remove()
+		    		that.setClone(node.node, that.interact); if(that.callback)that.callback(node)
+		    	}
+			})
+
+
 	    	break;
 
 	    	case 'heatmap':
@@ -134,9 +144,34 @@ export default class Infomap
 			.attr('opacity', parseInt(d[this.csvData]) / 100)
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', '0.5')
-			.on('mouseover', function(d){that.setClone(this,  that.interact); if(that.callback) console.log('none')})
 			.on('mouseout', function(){that.interact.selectAll('g').remove()})
 			)
+
+			var centroids = this.setCentroids(this.map, this.centroids_map, "path.node", this);
+
+			this.map.on('mousemove',function(){
+				var coords=d3.mouse(this)
+				
+				var node=that.findClosest(coords,centroids.centroids)
+	    		that.interact.selectAll('g').remove()
+	    		that.setClone(node.node, that.interact); if(that.callback)that.callback(node)
+			})
+
+			var touchevents = new TouchEvents(this.map, {
+		    element:this.map.node(),
+
+		    touchStartCallback:function(coords){console.log('start')},
+		    touchEndCallback:function(coords){that.interact.selectAll('g').remove();console.log('end')},
+		    touchMoveCallback:function(coords){
+
+		    		coords[1]-=30;
+		    		
+		    		
+		    		var node=that.findClosest(coords,centroids.centroids)
+		    		that.interact.selectAll('g').remove()
+		    		that.setClone(node.node, that.interact); if(that.callback)that.callback(node)
+		    	}
+			})
 	    	break;
 			
 	    	case 'bubbles':
@@ -240,4 +275,66 @@ export default class Infomap
 		return this.path;
 	}
 
+	findClosest(coords,array) {
+		var self=this;
+	  	var closest_node=null,
+	  	dist=100;
+	  	//console.log(coords)
+	 
+	  	array.every(function(node){
+
+		    var c_centre=node.box,
+		    __dist=self.getDistance(coords[0],coords[1],c_centre[0],c_centre[1]);
+
+		    if(__dist<dist)
+		      {
+		        closest_node=node;
+		        dist=__dist;
+		      }
+
+		    return __dist>5;
+	            
+	    });
+
+	  	return closest_node;
+	}
+
+	getDistance(x1,y1,x2,y2)
+	{
+	  return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+	}
+
+	getCentroid(element)
+	{
+
+	  var bbox = element.getBBox();
+	  return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
+	}
+
+	setCentroids(_svg, object,selector,self)
+	{
+		object={
+			centroids:[]
+		};
+		_svg.selectAll(selector)
+			.each(function(d) {
+
+				var box=self.getCentroid(this);
+				object.centroids.push({
+					id:this.id,
+					node:this,
+					box:box
+				});
+
+	   		}
+	   	);
+	   	
+	return object;
+	
+
+	}
+
+	
+
+	
 }

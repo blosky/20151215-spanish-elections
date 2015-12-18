@@ -1,7 +1,6 @@
 import Infomap from './Infomap.js';
 import queue from './client/js/lib/queue.v1.min.js'
 import Activemap from './ActiveMap.js'
-import TouchEvents from './TouchEvents.js'
 
 class App
 {
@@ -20,6 +19,10 @@ class App
 	{
 			//console.log(json);
 			//return;
+			//var self=this;
+
+			var RATIO=1;
+
 			var colors = [];
 			colors["PP"]='#4DC6DD';
 			colors["PSOE"]='#B41700';
@@ -29,7 +32,6 @@ class App
 			colors["UPyD"]='#DB58A4';
 			colors["EH BILDU"]='#595959';
 			colors["EAJ-PNV"]='#669893';
-			colors["ERC"]='#FCDD03';
 			colors["C's"]='#FF9B0B';
 			colors["PODEMOS"]='#7D0069';
 			colors["EN COMÚ"]='#005789';
@@ -38,11 +40,14 @@ class App
 			colors["Others"]='#DADADA';
 
 
+			var mapsWidths = [620,620,620,620,620];
+			var mapsHeights= [300,300,300,300,300];
+
 			var map1 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container1"),
-				width:450,
-				height:300,
+				width:mapsWidths[0],
+				height:mapsHeights[0],
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
 					csv:json.sheets.Sheet1.map(function(d){
@@ -64,83 +69,45 @@ class App
 			map1.getProjection().scale(1400);
 			map1.createMap('choropleth');
 
-/*			new TouchEvents(map1.getMap(), {
-			    element:map1.getMap().node(),
-
-
-
-			    touchStartCallback:function(coords){console.log('start')},
-			    touchEndCallback:function(coords){d3.select('#tooltip').text('')},
-			    touchMoveCallback:function(coords)
-			    {
-
-			      console.log('****', coords, d3.event.clientY)
-			      var id = findClosest(coords, constituencies).id;
-
-			      
-			      var h = map.selectAll('.'+id).attr("d");
-			      var name = map.select('.'+id).attr('class').split(" ")[3].split("_").join(" ");
-
-			     d3.select('#interact g path')
-			     .attr('d', h)
-			     .attr('class','selected');
-
-			    
-
-			     d3.select('#tooltip p')
-			     .text(name)
-
-			      selected = map.select("." + id);
-			      bbox = selected.node().getBoundingClientRect();
-			      
-			      top = (bbox.top - mapBbox.top)+ (bbox.height / 2) -  tooltipbBbox.height / 2;
-			      left = (bbox.left - mapBbox.left) + bbox.width;
-
-			      if(left + tooltipbBbox.width > mapBbox.left + mapBbox.width)left -= tooltipbBbox.width + bbox.width;
-
-
-			     tooltip
-			     .style('top', top + 'px')
-			     .style('left', left + 'px')
-
-			    }
-  })*/
-
 			
-			function map1Callback(event)
+			function map1Callback(node)
 			{
+				var id = node.id
 				var result;
+				var tooltip = d3.select('#tooltip-results1');
 
 				d3.map(json.sheets.Sheet1, function(d)
-					{
-						if(d.code == event.split('c')[1])result = d; return;
-				})
+				{
+					if(d.code == id.split('c')[1])result = d; return;
+				});
 
-				//console.log(result);
+				var h=mapsHeights[0],
+					y=h/2-((h/2-node.box[1])*RATIO);
 
-				
-				var tooltip = d3.select('#tooltip');
-				tooltip.classed("inactive", false);
-
-				d3.select('#container1 #map')
-				.on("mousemove", function(d)
-					{
-						console.log(d3.mouse(this))
-						tooltip
-						.html('aljshdblahbc')
-						.style('top', d3.mouse(this)[1] + 'px')
-						.style('left', d3.mouse(this)[0] + 'px')
-					})
+				var posX = (node.box[0]*RATIO);
 
 				
+				tooltip
+				.html
+					(
+						'<p><b>' + result.province + '</b></p>' + 
+						'<p>'+result.party+'</p>'
 
+					)
+				
+
+				if(posX > window.innerWidth / 2)posX = posX - document.getElementById('tooltip-results1').offsetWidth - 20;
+
+				tooltip
+				.style('left', posX + 'px')
+				.style('top', y + 'px');
 			}
 
 
 			var map2 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container2"),
-				width:300,
+				width:mapsWidths[1],
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -154,7 +121,8 @@ class App
 					className:'code',
 					data:"percentage"
 				},
-				colors:colors["PP"]
+				colors:colors["PP"],
+				callback:map2Callback
 			});
 
 			map2.setProjection(d3.geo.azimuthalEqualArea());
@@ -162,10 +130,42 @@ class App
 			map2.getProjection().scale(1400);
 			map2.createMap('heatmap');
 
+			function map2Callback(node)
+			{
+				var id = node.id
+				var result;
+				var tooltip = d3.select('#tooltip-results2');
+
+				d3.map(json.sheets.Sheet1, function(d)
+				{
+					if(d.code == id.split('c')[1])result = d; return;
+				});
+
+				var h=mapsHeights[0],
+					y=h/2-((h/2-node.box[1])*RATIO);
+
+				var posX = (node.box[0]*RATIO);
+
+				tooltip
+				.html
+					(
+						'<p><b>' + result.province + '</b></p>' + 
+						'<p>'+result['pp-percentage']+'%</p>'
+
+					)
+				
+
+				if(posX > window.innerWidth / 2)posX = posX - document.getElementById('tooltip-results2').offsetWidth - 20;
+
+				tooltip
+				.style('left', posX + 'px')
+				.style('top', y + 'px');
+			}
+
 			var map3 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container3"),
-				width:300,
+				width:mapsWidths[2],
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -179,7 +179,8 @@ class App
 					className:'code',
 					data:"percentage"
 				},
-				colors:colors["PSOE"]
+				colors:colors["PSOE"],
+				callback:map3Callback
 			});
 
 			map3.setProjection(d3.geo.azimuthalEqualArea());
@@ -187,36 +188,43 @@ class App
 			map3.getProjection().scale(1400);
 			map3.createMap('heatmap');
 
+			function map3Callback(node)
+			{
+				var id = node.id
+				var result;
+				var tooltip = d3.select('#tooltip-results3');
+
+				d3.map(json.sheets.Sheet1, function(d)
+				{
+					if(d.code == id.split('c')[1])result = d; return;
+				});
+
+				var h=mapsHeights[0],
+					y=h/2-((h/2-node.box[1])*RATIO);
+
+				var posX = (node.box[0]*RATIO);
+				console.log(result)
+				tooltip
+				.html
+					(
+						'<p><b>' + result.province + '</b></p>' + 
+						'<p>'+result['psoe-percentage']+'%</p>'
+
+					)
+				
+
+				if(posX > window.innerWidth / 2)posX = posX - document.getElementById('tooltip-results3').offsetWidth - 20;
+
+				tooltip
+				.style('left', posX + 'px')
+				.style('top', y + 'px');
+			}
+
 
 			var map4 = self.infomap = new Infomap(
 			{
 				container:document.getElementById("container4"),
-				width:300,
-				height:300,
-				geo:{topojson:topojson,className:'ID_2'},
-				data:{
-					csv:json.sheets.Sheet1.map(function(d){
-						return {
-							code:"c"+d.code,
-							percentage:d["cs-percentage"]
-						}
-					}
-					),
-					className:'code',
-					data:"percentage"
-				},
-				colors:colors["C's"]
-			});
-
-			map4.setProjection(d3.geo.azimuthalEqualArea());
-			map4.getProjection().center([-1.8,39]);
-			map4.getProjection().scale(1400);
-			map4.createMap('heatmap');
-
-			var map5 = self.infomap = new Infomap(
-			{
-				container:document.getElementById("container5"),
-				width:300,
+				width:mapsWidths[3],
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -230,7 +238,66 @@ class App
 					className:'code',
 					data:"percentage"
 				},
-				colors:colors["PODEMOS"]
+				colors:colors["PODEMOS"],
+				callback:map4Callback
+			});
+
+			map4.setProjection(d3.geo.azimuthalEqualArea());
+			map4.getProjection().center([-1.8,39]);
+			map4.getProjection().scale(1400);
+			map4.createMap('heatmap');
+
+			function map4Callback(node)
+			{
+				var id = node.id
+				var result;
+				var tooltip = d3.select('#tooltip-results4');
+
+				d3.map(json.sheets.Sheet1, function(d)
+				{
+					if(d.code == id.split('c')[1])result = d; return;
+				});
+
+				var h=mapsHeights[0],
+					y=h/2-((h/2-node.box[1])*RATIO);
+
+				var posX = (node.box[0]*RATIO);
+
+				tooltip
+				.html
+					(
+						'<p><b>' + result.province + '</b></p>' + 
+						'<p>'+result['podemos-percentage']+'%</p>'
+
+					)
+				
+
+				if(posX > window.innerWidth / 2)posX = posX - document.getElementById('tooltip-results4').offsetWidth - 20;
+
+				tooltip
+				.style('left', posX + 'px')
+				.style('top', y + 'px');
+			}
+
+			var map5 = self.infomap = new Infomap(
+			{
+				container:document.getElementById("container5"),
+				width:mapsWidths[4],
+				height:300,
+				geo:{topojson:topojson,className:'ID_2'},
+				data:{
+					csv:json.sheets.Sheet1.map(function(d){
+						return {
+							code:"c"+d.code,
+							percentage:d["cs-percentage"]
+						}
+					}
+					),
+					className:'code',
+					data:"percentage"
+				},
+				colors:colors["C's"],
+				callback:map5Callback
 			});
 
 			map5.setProjection(d3.geo.azimuthalEqualArea());
@@ -238,31 +305,68 @@ class App
 			map5.getProjection().scale(1400);
 			map5.createMap('heatmap');
 
+			function map5Callback(node)
+			{
+				var id = node.id
+				var result;
+				var tooltip = d3.select('#tooltip-results5');
 
-			var temp = [450,300,300,300,300];
+				d3.map(json.sheets.Sheet1, function(d)
+				{
+					if(d.code == id.split('c')[1])result = d; return;
+				});
+
+				var h=mapsHeights[0],
+					y=h/2-((h/2-node.box[1])*RATIO);
+
+				var posX = (node.box[0]*RATIO);
+
+				tooltip
+				.html
+					(
+						'<p><b>' + result.province + '</b></p>' + 
+						'<p>'+result['podemos-percentage']+'%</p>'
+
+					)
+				
+
+				if(posX > window.innerWidth / 2)posX = posX - document.getElementById('tooltip-results5').offsetWidth - 20;
+
+				tooltip
+				.style('left', posX + 'px')
+				.style('top', y + 'px');
+			}
+
+
+
 
 			resizeMaps();
 			window.onresize = () => resizeMaps(event);
 
 			function resizeMaps()
 			{
-				//console.log(self,self.width);
-				if(window.innerWidth >= self.width)
+
+				if(window.innerWidth >= mapsWidths[0])
 				{
 					d3.selectAll(".container")
-					//.style('height', self.height)
-					//.style('height', document.querySelector(".container").offsetWidth)
-					.data(temp)
+					.data(mapsWidths)
 					.selectAll('svg')
 					.style('width', d => d);
 				}
 				else
 				{
 					d3.selectAll(".container")
-					//.style('height', document.querySelector(".container").offsetWidth)
 					.selectAll('svg')
 					.style('width', '100%');
 				}
+				var ratio=window.innerWidth/mapsWidths[0];
+				//console.log(window.innerWidth,mapsWidths[0])
+				RATIO=1;
+				if(ratio<=1){
+					//map1.resize(ratio);	
+					RATIO=ratio;
+				}
+				
 			}
 		}
 

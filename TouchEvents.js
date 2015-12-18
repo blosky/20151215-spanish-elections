@@ -61,7 +61,7 @@
          
         function onMove(ev) {
 
-            console.log(ev)
+
             if (action) {
 
                 var touches=d3.touches(options.element)
