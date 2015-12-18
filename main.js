@@ -1,6 +1,7 @@
 import Infomap from './Infomap.js';
 import queue from './client/js/lib/queue.v1.min.js'
 import Activemap from './ActiveMap.js'
+import TouchEvents from './TouchEvents.js'
 
 class App
 {
@@ -63,7 +64,49 @@ class App
 			map1.getProjection().scale(1400);
 			map1.createMap('choropleth');
 
+/*			new TouchEvents(map1.getMap(), {
+			    element:map1.getMap().node(),
 
+
+
+			    touchStartCallback:function(coords){console.log('start')},
+			    touchEndCallback:function(coords){d3.select('#tooltip').text('')},
+			    touchMoveCallback:function(coords)
+			    {
+
+			      console.log('****', coords, d3.event.clientY)
+			      var id = findClosest(coords, constituencies).id;
+
+			      
+			      var h = map.selectAll('.'+id).attr("d");
+			      var name = map.select('.'+id).attr('class').split(" ")[3].split("_").join(" ");
+
+			     d3.select('#interact g path')
+			     .attr('d', h)
+			     .attr('class','selected');
+
+			    
+
+			     d3.select('#tooltip p')
+			     .text(name)
+
+			      selected = map.select("." + id);
+			      bbox = selected.node().getBoundingClientRect();
+			      
+			      top = (bbox.top - mapBbox.top)+ (bbox.height / 2) -  tooltipbBbox.height / 2;
+			      left = (bbox.left - mapBbox.left) + bbox.width;
+
+			      if(left + tooltipbBbox.width > mapBbox.left + mapBbox.width)left -= tooltipbBbox.width + bbox.width;
+
+
+			     tooltip
+			     .style('top', top + 'px')
+			     .style('left', left + 'px')
+
+			    }
+  })*/
+
+			
 			function map1Callback(event)
 			{
 				var result;
@@ -75,8 +118,22 @@ class App
 
 				//console.log(result);
 
+				
+				var tooltip = d3.select('#tooltip');
+				tooltip.classed("inactive", false);
 
-				d3.select('#container1 #map').on("mousemove", function(d){console.log(d3.mouse(this))})
+				d3.select('#container1 #map')
+				.on("mousemove", function(d)
+					{
+						console.log(d3.mouse(this))
+						tooltip
+						.html('aljshdblahbc')
+						.style('top', d3.mouse(this)[1] + 'px')
+						.style('left', d3.mouse(this)[0] + 'px')
+					})
+
+				
+
 			}
 
 
@@ -182,7 +239,7 @@ class App
 			map5.createMap('heatmap');
 
 
-			var temp = [900,620,620,300,300];
+			var temp = [450,300,300,300,300];
 
 			resizeMaps();
 			window.onresize = () => resizeMaps(event);

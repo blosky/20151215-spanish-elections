@@ -170,7 +170,7 @@ export default class Infomap
 
 	//GETTERS
 
-	getSvg()
+	getMap()
 	{
 		return this.map;
 	}
