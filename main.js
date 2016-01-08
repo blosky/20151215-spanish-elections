@@ -1,6 +1,6 @@
 import Infomap from './Infomap.js';
 import queue from './client/js/lib/queue.v1.min.js'
-import Activemap from './ActiveMap.js'
+/*import Activemap from './ActiveMap.js'*/
 
 class App
 {
@@ -17,11 +17,8 @@ class App
 
 	createMap(error, topojson, json)
 	{
-			//console.log(json);
-			//return;
-			//var self=this;
 
-			var RATIO=1;
+			var RATIO=0;
 
 			var colors = [];
 			colors["PP"]='#4DC6DD';
@@ -34,23 +31,21 @@ class App
 			colors["EAJ-PNV"]='#669893';
 			colors["C's"]='#FF9B0B';
 			colors["PODEMOS"]='#7D0069';
-			colors["EN COMÚ"]='#005789';
+			colors["EN COMÚ"]='#7D0069';
 			colors["UNIO.CAT"]='#7F3A14';
 			colors["ERC-CATSÍ"]='#C5D4EA';
-			colors["Others"]='#DADADA';
+			colors["DL"]='#01C6A4';
+			colors["PNV"]='#B9BF01';
 
 
-			var mapsWidths = [620,620,620,620,620];
-			var mapsHeights= [300,300,300,300,300];
-
-			var map1 = self.infomap = new Infomap(
+			var map1 = new Infomap(
 			{
-				container:document.getElementById("container1"),
-				width:mapsWidths[0],
-				height:mapsHeights[0],
+				container:"map1",
+				width:620,
+				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
-					csv:json.sheets.Sheet1.map(function(d){
+					csv:json.sheets.Sheet1.map(function(d){console.log(d)
 						return {
 							code:"c"+d.code,
 							party:d.party
@@ -61,12 +56,13 @@ class App
 					data:"party"
 				},
 				colors:colors,
-				callback:map1Callback
+				callback:map1Callback,
+				callbackOut:map1CallbackOut
 			});
 
 			map1.setProjection(d3.geo.azimuthalEqualArea());
 			map1.getProjection().center([-1.8,39]);
-			map1.getProjection().scale(1400);
+			map1.getProjection().scale(1900);
 			map1.createMap('choropleth');
 
 			
@@ -75,23 +71,26 @@ class App
 				var id = node.id
 				var result;
 				var tooltip = d3.select('#tooltip-results1');
+				var ratio = map1.getRatio();
+
+				console.log('main: ',ratio)
 
 				d3.map(json.sheets.Sheet1, function(d)
 				{
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=mapsHeights[0],
-					y=h/2-((h/2-node.box[1])*RATIO);
+				var h=300,
+					y=h/2-((h/2-node.box[1])*ratio);
 
-				var posX = (node.box[0]*RATIO);
+				var posX = (node.box[0]*ratio);
 
 				
 				tooltip
 				.html
 					(
 						'<p><b>' + result.province + '</b></p>' + 
-						'<p>'+result.party+'</p>'
+						'<p>' + result.party + '</p>'
 
 					)
 				
@@ -99,15 +98,23 @@ class App
 				if(posX > window.innerWidth / 2)posX = posX - document.getElementById('tooltip-results1').offsetWidth - 20;
 
 				tooltip
+				.style('display', 'block')
 				.style('left', posX + 'px')
 				.style('top', y + 'px');
 			}
 
-
-			var map2 = self.infomap = new Infomap(
+			function map1CallbackOut(event)
 			{
-				container:document.getElementById("container2"),
-				width:mapsWidths[1],
+				var tooltip = d3.select('#tooltip-results1');
+				tooltip
+				.style('display', 'none')
+			}
+
+
+			var map2 = new Infomap(
+			{
+				container:"map2",
+				width:620,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -122,12 +129,13 @@ class App
 					data:"percentage"
 				},
 				colors:colors["PP"],
-				callback:map2Callback
+				callback:map2Callback,
+				callbackOut:map2CallbackOut
 			});
 
 			map2.setProjection(d3.geo.azimuthalEqualArea());
 			map2.getProjection().center([-1.8,39]);
-			map2.getProjection().scale(1400);
+			map2.getProjection().scale(1900);
 			map2.createMap('heatmap');
 
 			function map2Callback(node)
@@ -135,16 +143,17 @@ class App
 				var id = node.id
 				var result;
 				var tooltip = d3.select('#tooltip-results2');
+				var ratio = map2.getRatio();
 
 				d3.map(json.sheets.Sheet1, function(d)
 				{
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=mapsHeights[0],
-					y=h/2-((h/2-node.box[1])*RATIO);
+				var h=300,
+					y=h/2-((h/2-node.box[1])*ratio);
 
-				var posX = (node.box[0]*RATIO);
+				var posX = (node.box[0]*ratio);
 
 				tooltip
 				.html
@@ -158,14 +167,22 @@ class App
 				if(posX > window.innerWidth / 2)posX = posX - document.getElementById('tooltip-results2').offsetWidth - 20;
 
 				tooltip
+				.style('display', 'block')
 				.style('left', posX + 'px')
 				.style('top', y + 'px');
 			}
 
-			var map3 = self.infomap = new Infomap(
+			function map2CallbackOut(event)
 			{
-				container:document.getElementById("container3"),
-				width:mapsWidths[2],
+				var tooltip = d3.select('#tooltip-results2');
+				tooltip
+				.style('display', 'none')
+			}
+
+			var map3 = new Infomap(
+			{
+				container:"map3",
+				width:620,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -185,7 +202,7 @@ class App
 
 			map3.setProjection(d3.geo.azimuthalEqualArea());
 			map3.getProjection().center([-1.8,39]);
-			map3.getProjection().scale(1400);
+			map3.getProjection().scale(1900);
 			map3.createMap('heatmap');
 
 			function map3Callback(node)
@@ -193,17 +210,18 @@ class App
 				var id = node.id
 				var result;
 				var tooltip = d3.select('#tooltip-results3');
+				var ratio = map3.getRatio();
 
 				d3.map(json.sheets.Sheet1, function(d)
 				{
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=mapsHeights[0],
-					y=h/2-((h/2-node.box[1])*RATIO);
+				var h=300,
+					y=h/2-((h/2-node.box[1])*ratio);
 
-				var posX = (node.box[0]*RATIO);
-				console.log(result)
+				var posX = (node.box[0]*ratio);
+				console.log('**', result, posX)
 				tooltip
 				.html
 					(
@@ -221,10 +239,10 @@ class App
 			}
 
 
-			var map4 = self.infomap = new Infomap(
+			var map4 = new Infomap(
 			{
-				container:document.getElementById("container4"),
-				width:mapsWidths[3],
+				container:"map4",
+				width:620,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -244,7 +262,7 @@ class App
 
 			map4.setProjection(d3.geo.azimuthalEqualArea());
 			map4.getProjection().center([-1.8,39]);
-			map4.getProjection().scale(1400);
+			map4.getProjection().scale(1900);
 			map4.createMap('heatmap');
 
 			function map4Callback(node)
@@ -252,16 +270,17 @@ class App
 				var id = node.id
 				var result;
 				var tooltip = d3.select('#tooltip-results4');
+				var ratio = map4.getRatio();
 
 				d3.map(json.sheets.Sheet1, function(d)
 				{
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=mapsHeights[0],
-					y=h/2-((h/2-node.box[1])*RATIO);
+				var h=300,
+					y=h/2-((h/2-node.box[1])*ratio);
 
-				var posX = (node.box[0]*RATIO);
+				var posX = (node.box[0]*ratio);
 
 				tooltip
 				.html
@@ -279,10 +298,10 @@ class App
 				.style('top', y + 'px');
 			}
 
-			var map5 = self.infomap = new Infomap(
+			var map5 = new Infomap(
 			{
-				container:document.getElementById("container5"),
-				width:mapsWidths[4],
+				container:"map5",
+				width:620,
 				height:300,
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
@@ -302,24 +321,29 @@ class App
 
 			map5.setProjection(d3.geo.azimuthalEqualArea());
 			map5.getProjection().center([-1.8,39]);
-			map5.getProjection().scale(1400);
+			map5.getProjection().scale(1900);
 			map5.createMap('heatmap');
 
 			function map5Callback(node)
 			{
-				var id = node.id
-				var result;
-				var tooltip = d3.select('#tooltip-results5');
+				if(node)
+				{
+					var id = node.id
+					var result;
+					var tooltip = d3.select('#tooltip-results5');
+				}
+				var ratio = map5.getRatio();
+
 
 				d3.map(json.sheets.Sheet1, function(d)
 				{
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=mapsHeights[0],
-					y=h/2-((h/2-node.box[1])*RATIO);
+				var h=300,
+					y=h/2-((h/2-node.box[1])*ratio);
 
-				var posX = (node.box[0]*RATIO);
+				var posX = (node.box[0]*ratio);
 
 				tooltip
 				.html
@@ -336,8 +360,6 @@ class App
 				.style('left', posX + 'px')
 				.style('top', y + 'px');
 			}
-
-
 
 
 			resizeMaps();
@@ -368,7 +390,12 @@ class App
 				}
 				
 			}
+
+
+
 		}
+
+
 
 	}
 

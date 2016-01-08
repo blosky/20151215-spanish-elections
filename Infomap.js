@@ -1,18 +1,23 @@
 import d3 from './d3.v3.min.js'
 import topojson from './topojson.v1.min.js'
 import Scalecolor from './client/js/lib/Scalecolor.js'
-import TouchEvents from './TouchEvents.js'
 
 
 
 export default class Infomap
 {
-	constructor({container, width = 200, height = 700, geo = {topojson, className}, data = {csv, className, data}, quantile = {domain:[0,100], range:10}, colors = ['#4BC6DF','#951C55'], callback})	
+	constructor({container, width = 200, height = 700, geo = {topojson, className}, data = {csv, className, data}, quantile = {domain:[0,100], range:10}, colors = ['#4BC6DF','#951C55'], callback, callbackOut})	
 	{
 		var self = this;
 		this.container = container;
+
+		console.log(this.container)
+
+		this._container=d3.select("#"+this.container);
 		this.width = width;
 		this.height = height;
+
+		var RATIO=0;
 
 		/*this.quantile = d3.scale.quantile()
 		.domain(quantile.domain)
@@ -36,10 +41,11 @@ export default class Infomap
 		this.path;
 		
 		var createSvg = function(id, position, left, top, events){
-			return d3.select(self.container).style('height', self.height).append('svg')
+			return d3.select('#' + self.container).style('height', self.height)
+			.append('svg')
 			.attr('id', id)
 			.attr("viewBox", '0 0 '+ self.width + " " + self.height )//"0 0 300 205")
-			.attr("preserveAspectRatio", "xMidYMid")
+			.attr("preserveAspectRatio", "xMinYMin")
 			.style('width', self.width)
 			.style('height', self.height)
 			.style('position', position)
@@ -54,7 +60,7 @@ export default class Infomap
 		this.interact = createSvg('interact', 'absolute', 0, 0,'none');
 
 		this.callback = callback;
-
+		this.callbackOut = callbackOut;
 	}
 
 
@@ -92,7 +98,7 @@ export default class Infomap
 			.attr("d", this.path);
 
 			d3.map(this.csv, d => 
-			this.map.select('#'+this.container.id+' #'+ this.getClassname(d[this.csvClassName]))
+			this.map.select('#'+this.container+' #'+ this.getClassname(d[this.csvClassName]))
 			.attr('fill', this.colors[d[this.csvData]])
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', '0.5')
@@ -102,29 +108,9 @@ export default class Infomap
 			var centroids = this.setCentroids(this.map, this.centroids_map, "path.node", this);
 
 			this.map.on('mousemove',function(){
-				var coords=d3.mouse(this)
-				
-				var node=that.findClosest(coords,centroids.centroids)
-	    		that.interact.selectAll('g').remove()
-	    		that.setClone(node.node, that.interact); if(that.callback)that.callback(node)
+
+				that.onMouseMoveCallBack(this, centroids.centroids);
 			})
-
-			var touchevents = new TouchEvents(this.map, {
-		    element:this.map.node(),
-
-		    touchStartCallback:function(coords){console.log('start')},
-		    touchEndCallback:function(coords){that.interact.selectAll('g').remove();console.log('end')},
-		    touchMoveCallback:function(coords){
-
-		    		coords[1]-=30;
-		    		
-		    		
-		    		var node=that.findClosest(coords,centroids.centroids)
-		    		that.interact.selectAll('g').remove()
-		    		that.setClone(node.node, that.interact); if(that.callback)that.callback(node)
-		    	}
-			})
-
 
 	    	break;
 
@@ -139,40 +125,24 @@ export default class Infomap
 	
 			d3.map(this.csv, d => 
 
-			this.map.select('#'+this.container.id+' #'+ this.getClassname(d[this.csvClassName]))
+			this.map.select('#'+this.container+' #'+ this.getClassname(d[this.csvClassName]))
 			.attr('fill', this.colors)
 			.attr('opacity', parseInt(d[this.csvData]) / 100)
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', '0.5')
-			.on('mouseout', function(){that.interact.selectAll('g').remove()})
+			.on('mouseout', function(){that.interact.selectAll('g').remove();})
 			)
 
 			var centroids = this.setCentroids(this.map, this.centroids_map, "path.node", this);
 
 			this.map.on('mousemove',function(){
-				var coords=d3.mouse(this)
-				
-				var node=that.findClosest(coords,centroids.centroids)
-	    		that.interact.selectAll('g').remove()
-	    		that.setClone(node.node, that.interact); if(that.callback)that.callback(node)
-			})
 
-			var touchevents = new TouchEvents(this.map, {
-		    element:this.map.node(),
-
-		    touchStartCallback:function(coords){console.log('start')},
-		    touchEndCallback:function(coords){that.interact.selectAll('g').remove();console.log('end')},
-		    touchMoveCallback:function(coords){
-
-		    		coords[1]-=30;
-		    		
-		    		
-		    		var node=that.findClosest(coords,centroids.centroids)
-		    		that.interact.selectAll('g').remove()
-		    		that.setClone(node.node, that.interact); if(that.callback)that.callback(node)
-		    	}
+				that.onMouseMoveCallBack(this, centroids.centroids);
 			})
 	    	break;
+
+
+	    	//TODO make independent bubblemap selection of coloured maps. If there is no color scale then represent just sizes in b&w
 			
 	    	case 'bubbles':
 	    	 this.map.selectAll('.nodes')
@@ -196,50 +166,14 @@ export default class Infomap
 	}
 
 
-	redraw()
-	{
-		d3.selectAll('path')
-		.attr('d', this.path.projection(this.getProjection()));
-	}
-
-
 	//GETTERS
 
-	getMap()
-	{
-		return this.map;
-	}
-
-	getCenter(features)
-	{
-		var bbox = d3.geo.bounds(features);
-		var x = (bbox[0][0] + bbox[1][0]) / 2;
-		var y = (bbox[0][1] + bbox[1][1]) / 2;
-
-		return [x,y];
-	}
-
-	getUnit()
-	{
-		return this.unit;
-	}
 
 	getProjection()
 	{
 		return this.projection
 	}
 
-
-	getScaleRadius(radius1, radius2, steps)
-	{
-		var range = radius2-radius1 / steps;
-		var rads = [];
-		for (var i = 1; i <= steps; i++) {
-			rads.push(range * i);
-		};
-
-		return rads;
-	}
 
 	getClassname(string)
 	{
@@ -311,6 +245,11 @@ export default class Infomap
 	  return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
 	}
 
+	getRatio()
+	{
+		return this.RATIO;
+	}
+
 	setCentroids(_svg, object,selector,self)
 	{
 		object={
@@ -330,11 +269,59 @@ export default class Infomap
 	   	);
 	   	
 	return object;
-	
-
 	}
 
-	
+	onMouseMoveCallBack(coordinates, centroids)
+	{
+		var coords=d3.mouse(coordinates);
+		var node=this.findClosest(coords,centroids)
+	    this.interact.selectAll('g').remove()
+	    if(node)
+	    {
+	    	this.setClone(node.node, this.interact);
+	    	if(this.callback)this.callback(node)
+	    }
+		else
+		{
+			if(this.callbackOut)this.callbackOut(event)	
+		}
+	    
+	    	
+	}
 
-	
+
+	resizeMap(event)
+	{
+		var that = this;
+		setTimeout(function()
+		{
+			
+			if(window.innerWidth >= that.width)
+			{
+				that.RATIO=1;
+				that._container//.select(".map")
+				.style('height', that.height)
+				.selectAll('svg')
+				.style('width', that.width)
+				.style('height', that.height);
+			}
+			else
+			{
+				var ratio=window.innerWidth/that.width;
+				that.RATIO=1;
+				if(ratio<=1)that.RATIO=ratio;
+
+				console.log('Infomap: ',that.RATIO)
+
+				that._container//.select(".map")
+				.style('height', that.height * ratio)
+				.selectAll('svg')
+				.style('width', '100%')
+				.style('height', that.height * ratio);
+			}
+
+			//if(that.callback)that.callback()	
+
+		}, 500)
+	}
 }
