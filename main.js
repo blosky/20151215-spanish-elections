@@ -37,15 +37,18 @@ class App
 			colors["DL"]='#01C6A4';
 			colors["PNV"]='#B9BF01';
 
+			var mapsWidths = [620,300,300,300,300]
+			var mapsHeights = [400, 300,300,300,300]
+
 
 			var map1 = new Infomap(
 			{
-				container:"map1",
-				width:620,
-				height:300,
+				container:"map0",
+				width:mapsWidths[0],
+				height:mapsHeights[0],
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
-					csv:json.sheets.Sheet1.map(function(d){console.log(d)
+					csv:json.sheets.Sheet1.map(function(d){
 						return {
 							code:"c"+d.code,
 							party:d.party
@@ -61,8 +64,8 @@ class App
 			});
 
 			map1.setProjection(d3.geo.azimuthalEqualArea());
-			map1.getProjection().center([-1.8,39]);
-			map1.getProjection().scale(1900);
+			map1.getProjection().center([-1,39]);
+			map1.getProjection().scale(2100);
 			map1.createMap('choropleth');
 
 			
@@ -71,20 +74,16 @@ class App
 				var id = node.id
 				var result;
 				var tooltip = d3.select('#tooltip-results1');
-				var ratio = map1.getRatio();
-
-				console.log('main: ',ratio)
 
 				d3.map(json.sheets.Sheet1, function(d)
 				{
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=300,
-					y=h/2-((h/2-node.box[1])*ratio);
 
-				var posX = (node.box[0]*ratio);
-
+				var posX = (node.box[0]*RATIO);
+				var posY = (node.box[1]*RATIO);
+				
 				
 				tooltip
 				.html
@@ -97,14 +96,16 @@ class App
 
 				if(posX > window.innerWidth / 2)posX = posX - document.getElementById('tooltip-results1').offsetWidth - 20;
 
+			
 				tooltip
 				.style('display', 'block')
 				.style('left', posX + 'px')
-				.style('top', y + 'px');
+				.style('top', posY + 'px');
 			}
 
 			function map1CallbackOut(event)
 			{
+				console.log("paso por aqui")
 				var tooltip = d3.select('#tooltip-results1');
 				tooltip
 				.style('display', 'none')
@@ -113,9 +114,9 @@ class App
 
 			var map2 = new Infomap(
 			{
-				container:"map2",
-				width:620,
-				height:300,
+				container:"map1",
+				width:mapsWidths[1],
+				height:mapsHeights[1],
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
 					csv:json.sheets.Sheet1.map(function(d){
@@ -135,7 +136,7 @@ class App
 
 			map2.setProjection(d3.geo.azimuthalEqualArea());
 			map2.getProjection().center([-1.8,39]);
-			map2.getProjection().scale(1900);
+			map2.getProjection().scale(1500);
 			map2.createMap('heatmap');
 
 			function map2Callback(node)
@@ -143,17 +144,18 @@ class App
 				var id = node.id
 				var result;
 				var tooltip = d3.select('#tooltip-results2');
-				var ratio = map2.getRatio();
+				
 
 				d3.map(json.sheets.Sheet1, function(d)
 				{
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=300,
-					y=h/2-((h/2-node.box[1])*ratio);
+				var h=mapsHeights[1],
+					y=h/2-((h/2-node.box[1])*RATIO);
 
-				var posX = (node.box[0]*ratio);
+				var posX = (node.box[0]*RATIO);
+				var posY = (node.box[1]*RATIO);
 
 				tooltip
 				.html
@@ -169,7 +171,7 @@ class App
 				tooltip
 				.style('display', 'block')
 				.style('left', posX + 'px')
-				.style('top', y + 'px');
+				.style('top', posY + 'px');
 			}
 
 			function map2CallbackOut(event)
@@ -181,9 +183,9 @@ class App
 
 			var map3 = new Infomap(
 			{
-				container:"map3",
-				width:620,
-				height:300,
+				container:"map2",
+				width:mapsWidths[2],
+				height:mapsHeights[2],
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
 					csv:json.sheets.Sheet1.map(function(d){
@@ -202,7 +204,7 @@ class App
 
 			map3.setProjection(d3.geo.azimuthalEqualArea());
 			map3.getProjection().center([-1.8,39]);
-			map3.getProjection().scale(1900);
+			map3.getProjection().scale(1500);
 			map3.createMap('heatmap');
 
 			function map3Callback(node)
@@ -210,17 +212,17 @@ class App
 				var id = node.id
 				var result;
 				var tooltip = d3.select('#tooltip-results3');
-				var ratio = map3.getRatio();
+				
 
 				d3.map(json.sheets.Sheet1, function(d)
 				{
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=300,
-					y=h/2-((h/2-node.box[1])*ratio);
+				var posX = (node.box[0]*RATIO);
+				var posY = (node.box[1]*RATIO);
 
-				var posX = (node.box[0]*ratio);
+				var posX = (node.box[0]*RATIO);
 				console.log('**', result, posX)
 				tooltip
 				.html
@@ -235,15 +237,15 @@ class App
 
 				tooltip
 				.style('left', posX + 'px')
-				.style('top', y + 'px');
+				.style('top', posY + 'px');
 			}
 
 
 			var map4 = new Infomap(
 			{
-				container:"map4",
-				width:620,
-				height:300,
+				container:"map3",
+				width:mapsWidths[3],
+				height:mapsHeights[3],
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
 					csv:json.sheets.Sheet1.map(function(d){
@@ -262,7 +264,7 @@ class App
 
 			map4.setProjection(d3.geo.azimuthalEqualArea());
 			map4.getProjection().center([-1.8,39]);
-			map4.getProjection().scale(1900);
+			map4.getProjection().scale(1500);
 			map4.createMap('heatmap');
 
 			function map4Callback(node)
@@ -270,17 +272,18 @@ class App
 				var id = node.id
 				var result;
 				var tooltip = d3.select('#tooltip-results4');
-				var ratio = map4.getRatio();
+				
 
 				d3.map(json.sheets.Sheet1, function(d)
 				{
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=300,
-					y=h/2-((h/2-node.box[1])*ratio);
+				var h=mapsHeights[3],
+					y=h/2-((h/2-node.box[1])*RATIO);
 
-				var posX = (node.box[0]*ratio);
+				var posX = (node.box[0]*RATIO);
+				var posY = (node.box[1]*RATIO);
 
 				tooltip
 				.html
@@ -295,14 +298,14 @@ class App
 
 				tooltip
 				.style('left', posX + 'px')
-				.style('top', y + 'px');
+				.style('top', posY + 'px');
 			}
 
 			var map5 = new Infomap(
 			{
-				container:"map5",
-				width:620,
-				height:300,
+				container:"map4",
+				width:mapsWidths[4],
+				height:mapsHeights[4],
 				geo:{topojson:topojson,className:'ID_2'},
 				data:{
 					csv:json.sheets.Sheet1.map(function(d){
@@ -321,7 +324,7 @@ class App
 
 			map5.setProjection(d3.geo.azimuthalEqualArea());
 			map5.getProjection().center([-1.8,39]);
-			map5.getProjection().scale(1900);
+			map5.getProjection().scale(1500);
 			map5.createMap('heatmap');
 
 			function map5Callback(node)
@@ -332,7 +335,7 @@ class App
 					var result;
 					var tooltip = d3.select('#tooltip-results5');
 				}
-				var ratio = map5.getRatio();
+				
 
 
 				d3.map(json.sheets.Sheet1, function(d)
@@ -340,16 +343,15 @@ class App
 					if(d.code == id.split('c')[1])result = d; return;
 				});
 
-				var h=300,
-					y=h/2-((h/2-node.box[1])*ratio);
+				var posX = (node.box[0]*RATIO);
+				var posY = (node.box[1]*RATIO);
 
-				var posX = (node.box[0]*ratio);
 
 				tooltip
 				.html
 					(
 						'<p><b>' + result.province + '</b></p>' + 
-						'<p>'+result['podemos-percentage']+'%</p>'
+						'<p>'+result['cs-percentage']+'%</p>'
 
 					)
 				
@@ -358,7 +360,7 @@ class App
 
 				tooltip
 				.style('left', posX + 'px')
-				.style('top', y + 'px');
+				.style('top', posY + 'px');
 			}
 
 
@@ -368,26 +370,37 @@ class App
 			function resizeMaps()
 			{
 
-				if(window.innerWidth >= mapsWidths[0])
+				var ratio=window.innerWidth/d3.max(mapsWidths);
+				
+				RATIO=1;
+				if(ratio<=1){
+					RATIO=ratio;
+				}
+
+				if(window.innerWidth >= d3.max(mapsWidths))
 				{
-					d3.selectAll(".container")
-					.data(mapsWidths)
-					.selectAll('svg')
-					.style('width', d => d);
+					d3.map(mapsWidths, function(d,i)
+						{
+							d3.select('#map' + i)
+							.style('width', d)
+							.style('height', mapsHeights[i])
+							.selectAll('svg')
+							.style('height', mapsHeights[i])
+						})
 				}
 				else
 				{
-					d3.selectAll(".container")
-					.selectAll('svg')
-					.style('width', '100%');
+					
+					d3.map(mapsHeights, function(d,i)
+						{
+							d3.select('#map' + i)
+							.style('width', '100%')
+							.style('height', mapsHeights[i] * ratio)
+							.selectAll('svg')
+							.style('height', mapsHeights[i] * ratio)
+						})
 				}
-				var ratio=window.innerWidth/mapsWidths[0];
-				//console.log(window.innerWidth,mapsWidths[0])
-				RATIO=1;
-				if(ratio<=1){
-					//map1.resize(ratio);	
-					RATIO=ratio;
-				}
+				
 				
 			}
 

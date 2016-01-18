@@ -40,6 +40,10 @@
 
     .container .map{position: relative;}
 
+
+    #group{position: relative; float: left; width: 100%;}
+    #group .container{position: relative; float: left; width: 49%;}
+
     .tooltip{z-index:1000;
           position: absolute; background-color: white;
           padding: 5px;
@@ -156,7 +160,7 @@
 <div class='container' id='container1'>
     <h2>Leading party by province</h2>
     <div id='tooltip-results1' class="tooltip"></div>
-    <div id='map1' class='map'></div>
+    <div id='map0' class='map'></div>
     <ul class="veri__legend">
       <li><span class="veri__blip veri__blip--pp"></span>PP</li>
       <li><span class="veri__blip veri__blip--psoe"></span>PSOE</li>
@@ -166,33 +170,39 @@
     </ul>
 </div>
 
+
+<div id='group'>
+
 <div class='container' id='container2'>
   <h2>Strength of vote: PP</h2>
   <div id='tooltip-results2' class="tooltip"></div>
-  <div id='map2' class='map'></div>
+  <div id='map1' class='map'></div>
   <div class='gradient-legend'>
     <div id='pp-map-legend'></div>
     <div id='txt'>50%</div>
   </div>
+  
 </div>
   
 
   
 <div class='container' id='container3'>
-  <h2>Strength of vote: PSOE</h2>
+
+ <h2>Strength of vote: PSOE</h2>
   <div id='tooltip-results3' class="tooltip"></div>
-  <div id='map3' class='map'></div>
+  <div id='map2' class='map'></div>
   <div class='gradient-legend'>
     <div id='psoe-map-legend'></div>
     <div id='txt'>40%</div>
   </div>
+  
 </div>
   
 
 <div class='container' id='container4'>
   <h2>Strength of vote: Podemos</h2>
   <div id='tooltip-results4' class="tooltip"></div>
-  <div id='map4' class='map'></div>
+  <div id='map3' class='map'></div>
   <div class='gradient-legend'>
     <div id='podemos-map-legend'></div>
     <div id='txt'>30%</div>
@@ -202,11 +212,13 @@
 <div class='container' id='container5'>
   <h2>Strength of vote: Ciudadanos</h2>
   <div id='tooltip-results5' class="tooltip"></div>
-  <div id='map5' class='map'></div>
+  <div id='map4' class='map'></div>
   <div class='gradient-legend'>
     <div id='cs-map-legend'></div>
     <div id='txt'>20%</div>
   </div>
+</div>
+
 </div>
   
 

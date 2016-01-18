@@ -166,7 +166,8 @@ export default class Infomap
 	}
 
 
-	//GETTERS
+	//GETTERS & SETTERS
+
 
 
 	getProjection()
@@ -181,35 +182,13 @@ export default class Infomap
 		else return string
 	}
 
-	//SETTERS
-
-
-	setProjection(projection)
-	{
-		if(projection)this.projection = projection.translate([this.width/2, this.height/2]);
-		else console.log('There is no projection assigned');
-	}
-
-	setClone(d, interact)
-	{
-		return interact
-		.append("g")
-		.attr("id","clone")
-		.append("path")
-		.attr("class","selected")
-		.attr("d",d3.select(d).attr('d'))
-		.style('fill', 'none')
-		.style('stroke', 'black')
-		.style('stroke-width', 1);
-	}
-
 
 	getPath()
 	{	
 		return this.path;
 	}
 
-	findClosest(coords,array) {
+	getClosest(coords,array) {
 		var self=this;
 	  	var closest_node=null,
 	  	dist=100;
@@ -245,11 +224,6 @@ export default class Infomap
 	  return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
 	}
 
-	getRatio()
-	{
-		return this.RATIO;
-	}
-
 	setCentroids(_svg, object,selector,self)
 	{
 		object={
@@ -271,10 +245,29 @@ export default class Infomap
 	return object;
 	}
 
+	setProjection(projection)
+	{
+		if(projection)this.projection = projection.translate([this.width/2, this.height/2]);
+		else console.log('There is no projection assigned');
+	}
+
+	setClone(d, interact)
+	{
+		return interact
+		.append("g")
+		.attr("id","clone")
+		.append("path")
+		.attr("class","selected")
+		.attr("d",d3.select(d).attr('d'))
+		.style('fill', 'none')
+		.style('stroke', 'black')
+		.style('stroke-width', 1);
+	}
+
 	onMouseMoveCallBack(coordinates, centroids)
 	{
 		var coords=d3.mouse(coordinates);
-		var node=this.findClosest(coords,centroids)
+		var node=this.getClosest(coords,centroids)
 	    this.interact.selectAll('g').remove()
 	    if(node)
 	    {
@@ -290,38 +283,5 @@ export default class Infomap
 	}
 
 
-	resizeMap(event)
-	{
-		var that = this;
-		setTimeout(function()
-		{
-			
-			if(window.innerWidth >= that.width)
-			{
-				that.RATIO=1;
-				that._container//.select(".map")
-				.style('height', that.height)
-				.selectAll('svg')
-				.style('width', that.width)
-				.style('height', that.height);
-			}
-			else
-			{
-				var ratio=window.innerWidth/that.width;
-				that.RATIO=1;
-				if(ratio<=1)that.RATIO=ratio;
-
-				console.log('Infomap: ',that.RATIO)
-
-				that._container//.select(".map")
-				.style('height', that.height * ratio)
-				.selectAll('svg')
-				.style('width', '100%')
-				.style('height', that.height * ratio);
-			}
-
-			//if(that.callback)that.callback()	
-
-		}, 500)
-	}
+	
 }
