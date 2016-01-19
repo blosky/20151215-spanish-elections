@@ -6,7 +6,7 @@ import Scalecolor from './client/js/lib/Scalecolor.js'
 
 export default class Infomap
 {
-	constructor({container, width = 200, height = 700, geo = {topojson, className}, data = {csv, className, data}, quantile = {domain:[0,100], range:10}, colors = ['#4BC6DF','#951C55'], callback, callbackOut})	
+	constructor({container, width = 200, height = 700, geo = {topojson, className}, data = {csv, className, data}, quantile = {domain:[-100,100], range:10}, colors = ['#4BC6DF','#951C55'], callback, callbackOut})	
 	{
 		var self = this;
 		this.container = container;
@@ -19,9 +19,9 @@ export default class Infomap
 
 		var RATIO=0;
 
-		/*this.quantile = d3.scale.quantile()
+		this.quantile = d3.scale.quantile()
 		.domain(quantile.domain)
-		.range(d3.range(quantile.range).map(function(i) { return i; }));*/
+		.range(d3.range(quantile.range).map(function(i) { return i; }));
 
 		this.colors = colors;
 
@@ -37,6 +37,15 @@ export default class Infomap
 		this.csv = data.csv;
 		this.csvClassName = data.className;
 		this.csvData = data.data;
+
+
+
+		console.log(this.csvClassName)
+
+
+
+
+
 
 		this.path;
 		
@@ -158,8 +167,38 @@ export default class Infomap
 	    	break;
 
 	    	case 'scalerank':
-	    	var colorScale = new Scalecolor(colors[0], colors[1], quantile.range);
+
+	    	this.map.selectAll('.nodes')
+			.data(features.features)
+			.enter()
+			.append('path')
+			.attr('class', 'node')
+			.attr("id", d => (this.getClassname(d.properties[className])))
+			.attr("d", this.path);
+
+	    	var colorScale = new Scalecolor(this.colors[0], this.colors[1], this.quantile.range);
 			this.colors = colorScale.colors;
+
+			console.log(colorScale, this.colors, this.quantile)
+
+			d3.map(this.csv, d=> d3.select('#'+ this.getClassname(d[this.csvClassName]))
+			.attr('fill', this.colors[this.quantile(d[this.csvData])]))
+
+/*
+			d3.map(this.csv, d=>
+				
+					console.log(this.getClassname(d[this.csvClassName]), this.colors[this.quantile(d[this.csvData])], this.colors,this.quantile(d[this.csvData]))
+				)*/
+
+
+
+
+
+
+
+
+
+
 	    	break;
 	    }
 
@@ -178,8 +217,12 @@ export default class Infomap
 
 	getClassname(string)
 	{
-		if(isNaN(string))return string.replace(/ /g, "_").replace(/'|&/g, "");
-		else return string
+		if(string != undefined)
+		{
+			if(isNaN(string))return string.replace(/ /g, "_").replace(/'|&/g, "");
+			else return string
+		}
+		
 	}
 
 

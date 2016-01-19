@@ -11,11 +11,13 @@ class App
 
 		queue()
 		.defer(d3.json, 'client/json/esp_adm2.json')
+		.defer(d3.json, 'client/json/facilities.topojson')
 		.defer(d3.json, 'http://interactive.guim.co.uk/docsdata-test/13ByyTtZpwpfKgu1dycuLn72jh5Au2BPLSlTiDGEr9yY.json')
+		.defer(d3.csv, '001_GNM-24062015.csv')
 		.await(self.createMap);
 	}
 
-	createMap(error, topojson, json)
+	createMap(error, topojson, facilities, json, csv)
 	{
 
 			var RATIO=0;
@@ -37,8 +39,8 @@ class App
 			colors["DL"]='#01C6A4';
 			colors["PNV"]='#B9BF01';
 
-			var mapsWidths = [620,300,300,300,300]
-			var mapsHeights = [400, 300,300,300,300]
+			var mapsWidths = [620,300,300,300,300, 620]
+			var mapsHeights = [400, 300,300,300,300, 400]
 
 
 			var map1 = new Infomap(
@@ -362,6 +364,36 @@ class App
 				.style('left', posX + 'px')
 				.style('top', posY + 'px');
 			}
+
+
+
+			var map6 = new Infomap(
+			{
+				container:"map5",
+				width:mapsWidths[5],
+				height:mapsHeights[5],
+				geo:{topojson:facilities,className:'LAD14NM'},
+				data:{
+					csv:csv.map(function(d){
+						//console.log('MAIN: ', d['Local authority'])
+						return {
+							code:d['Local authority'],
+							percentage:d["variation"]
+						}
+					}
+					),
+					className:'code',
+					data:"percentage"
+				},
+				quantile:{domain:[-100,100], range:10},
+				colors:['#4BC6DF','#951C55']
+				//callback:map5Callback
+			});
+
+			map6.setProjection(d3.geo.mercator());
+			map6.getProjection().center([-1,52]);
+			map6.getProjection().scale(2500);
+			map6.createMap('scalerank');
 
 
 			resizeMaps();
